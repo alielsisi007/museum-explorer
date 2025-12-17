@@ -50,11 +50,17 @@ const AdminExhibits = () => {
     e.preventDefault();
     setIsSaving(true);
     try {
+      const submitData = new FormData();
+      submitData.append('name', formData.name);
+      submitData.append('description', formData.description);
+      submitData.append('location', formData.location);
+      submitData.append('category', formData.category);
+      
       if (editingExhibit) {
-        await exhibitsAPI.update(editingExhibit._id, formData);
+        await exhibitsAPI.update(editingExhibit._id, submitData);
         toast({ title: 'Exhibit Updated', description: 'Exhibit has been updated successfully.' });
       } else {
-        await exhibitsAPI.create(formData);
+        await exhibitsAPI.create(submitData);
         toast({ title: 'Exhibit Created', description: 'New exhibit has been created successfully.' });
       }
       fetchExhibits();

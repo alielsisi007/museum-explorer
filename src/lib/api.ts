@@ -8,9 +8,10 @@ export const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // Important for cookies-based auth
 });
 
-// Request interceptor to add auth token
+// Request interceptor to add auth token (for localStorage fallback)
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -29,90 +30,89 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+      // Don't redirect automatically, let the app handle it
     }
     return Promise.reject(error);
   }
 );
 
-// Auth API
+// Auth API - matches your backend routes
 export const authAPI = {
   login: (email: string, password: string) =>
-    api.post('/api/users/login', { email, password }),
+    api.post('/logIn', { email, password }),
   
   register: (data: { name: string; email: string; password: string }) =>
-    api.post('/api/users/register', data),
+    api.post('/register', data),
   
-  getProfile: () => api.get('/api/users/profile'),
+  getProfile: () => api.get('/profile'),
   
   updateProfile: (data: { name?: string; email?: string; password?: string }) =>
-    api.put('/api/users/profile', data),
+    api.put('/profile', data),
 };
 
-// Exhibits API
+// Tickets API (for ticket types)
+export const ticketsAPI = {
+  getTypes: () => api.get('/tickets'),
+  getById: (id: string) => api.get(`/tickets/${id}`),
+};
+
+// Posts/Exhibits API - matches your backend routes
 export const exhibitsAPI = {
   getAll: (params?: { page?: number; limit?: number; search?: string }) =>
-    api.get('/api/exhibits', { params }),
+    api.get('/posts', { params }),
   
-  getById: (id: string) => api.get(`/api/exhibits/${id}`),
+  getById: (id: string) => api.get(`/posts/${id}`),
   
-  create: (data: FormData | object) => api.post('/api/exhibits', data),
+  // Admin routes
+  create: (data: FormData) => 
+    api.post('/admin/createPost', data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
   
-  update: (id: string, data: FormData | object) =>
-    api.put(`/api/exhibits/${id}`, data),
+  update: (id: string, data: FormData) =>
+    api.put(`/admin/updatePost/${id}`, data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
   
-  delete: (id: string) => api.delete(`/api/exhibits/${id}`),
+  delete: (id: string) => api.delete(`/admin/deletePost/${id}`),
 };
 
-// Tickets API
-export const ticketsAPI = {
-  getTypes: () => api.get('/api/tickets'),
-  
-  getById: (id: string) => api.get(`/api/tickets/${id}`),
-  
-  create: (data: { name: string; price: number; description?: string }) =>
-    api.post('/api/tickets', data),
-  
-  update: (id: string, data: { name?: string; price?: number; description?: string }) =>
-    api.put(`/api/tickets/${id}`, data),
-  
-  delete: (id: string) => api.delete(`/api/tickets/${id}`),
-};
-
-// Bookings API
+// Bookings API - matches your backend routes
 export const bookingsAPI = {
-  getAll: (params?: { page?: number; limit?: number }) =>
-    api.get('/api/bookings', { params }),
-  
-  getMyBookings: () => api.get('/api/bookings/my'),
-  
-  getById: (id: string) => api.get(`/api/bookings/${id}`),
+  // User routes (requires verifyUser middleware)
+  getMyBookings: () => api.get('/bookings'),
   
   create: (data: {
-    ticketType: string;
+    ticketType?: string;
     quantity: number;
     visitDate: string;
     totalPrice: number;
-  }) => api.post('/api/bookings', data),
+  }) => api.post('/bookings', data),
   
-  cancel: (id: string) => api.put(`/api/bookings/${id}/cancel`),
+  update: (id: string, data: object) => api.put(`/bookings/${id}`, data),
+  
+  cancel: (id: string) => api.delete(`/bookings/${id}`),
+  
+  // Admin route (requires verifyAdmin middleware)
+  getAll: (params?: { page?: number; limit?: number }) =>
+    api.get('/admin/bookings', { params }),
 };
 
-// Admin API
+// Admin API - matches your backend routes
 export const adminAPI = {
-  getUsers: (params?: { page?: number; limit?: number }) =>
-    api.get('/api/admin/users', { params }),
+  getUsers: (params?: { page?: number; limit?: number; role?: string }) =>
+    api.get('/admin/users', { params }),
   
-  getUserById: (id: string) => api.get(`/api/admin/users/${id}`),
+  deleteUser: (userId: string) => 
+    api.delete('/admin/deleteUserAccount', { data: { userId } }),
   
-  updateUser: (id: string, data: { role?: string; isActive?: boolean }) =>
-    api.put(`/api/admin/users/${id}`, data),
+  updateUserToAdmin: (userId: string) => 
+    api.put('/admin/updateUserToAdmin', { userId }),
   
-  deleteUser: (id: string) => api.delete(`/api/admin/users/${id}`),
+  // Stats endpoint (if available, otherwise we'll use fallback)
+  getStats: () => api.get('/admin/stats'),
   
-  getStats: () => api.get('/api/admin/stats'),
-  
-  getAnalytics: () => api.get('/api/admin/analytics'),
+  getAnalytics: () => api.get('/admin/analytics'),
 };
 
 export default api;
