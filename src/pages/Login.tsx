@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import axios from 'axios';
+import { authAPI } from '@/lib/api';
 
 const loginSchema = z.object( {
   email: z.string().email( 'Invalid email address' ),
@@ -35,11 +35,7 @@ const Login = () => {
   const onSubmit = async ( data: LoginFormData ) => {
     setIsLoading( true );
     try {
-      const res = await axios.post(
-        `${ import.meta.env.VITE_API_URL }/auth/login`,
-        data,
-        { withCredentials: true }
-      );
+      await authAPI.login( data.email, data.password );
       toast( { title: 'Welcome back!', description: 'You have successfully logged in.' } );
       navigate( from, { replace: true } );
     } catch ( err: any ) {

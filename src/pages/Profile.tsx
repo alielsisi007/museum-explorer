@@ -26,9 +26,10 @@ const Profile = () => {
   useEffect( () => {
     const fetchBookings = async () => {
       try {
-        // نفترض أن هذا endpoint يعيد حجوزات المستخدم الحالي حسب backend
-        const response = await bookingsAPI.getBookings();
-        setBookings( response.data || [] );
+        // Backend provides current user's bookings at /bookings
+        const response = await bookingsAPI.getMyBookings();
+        // support both shapes: { bookings: [...] } or direct array
+        setBookings( response.data?.bookings || response.data || [] );
       } catch ( error ) {
         console.log( 'Could not fetch bookings', error );
       } finally {

@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import axios from 'axios';
+import { authAPI } from '@/lib/api';
 
 const registerSchema = z.object( {
   name: z.string().min( 2, 'Name must be at least 2 characters' ),
@@ -37,11 +37,7 @@ const Register = () => {
   const onSubmit = async ( data: RegisterFormData ) => {
     setIsLoading( true );
     try {
-      await axios.post( `${ import.meta.env.VITE_API_URL }/auth/register`, {
-        name: data.name,
-        email: data.email,
-        password: data.password,
-      }, { withCredentials: true } );
+      await authAPI.register( { name: data.name, email: data.email, password: data.password } );
       toast( { title: 'Account Created!', description: 'Welcome to Heritage Museum.' } );
       navigate( '/', { replace: true } );
     } catch ( err: any ) {

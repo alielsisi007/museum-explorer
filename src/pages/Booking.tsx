@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import axios from 'axios';
+import { ticketsAPI } from '@/lib/api';
 
 interface TicketType {
   _id: string;
@@ -39,7 +40,7 @@ const Booking = () => {
   useEffect( () => {
     const fetchTicketTypes = async () => {
       try {
-        const response = await axios.get( '/tickets/types' ); // جلب أنواع التذاكر
+        const response = await ticketsAPI.getTypes(); // uses centralized api.ts -> GET /tickets
         if ( response.data?.length > 0 ) setTicketTypes( response.data );
       } catch ( err ) {
         console.log( 'Using fallback ticket types' );

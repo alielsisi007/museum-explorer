@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { authAPI } from '@/lib/api';
+import { authAPI, adminAPI } from '@/lib/api';
 
 interface User {
   _id: string;
@@ -74,20 +74,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ( { children } ) 
   // Admin: get all users
   const getAllUsers = async () => {
     if ( !user || user.role !== 'admin' ) throw new Error( 'Admins only' );
-    const response = await authAPI.getUsers();
+    const response = await adminAPI.getUsers();
     return response.data;
   };
 
   // Admin: delete user
   const deleteUser = async ( userId: string ) => {
     if ( !user || user.role !== 'admin' ) throw new Error( 'Admins only' );
-    await authAPI.deleteUser( userId );
+    await adminAPI.deleteUser( userId );
   };
 
   // Admin: promote user to admin
   const promoteToAdmin = async ( userId: string ) => {
     if ( !user || user.role !== 'admin' ) throw new Error( 'Admins only' );
-    await authAPI.updateUserToAdmin( userId );
+    await adminAPI.updateUserToAdmin( userId );
   };
 
   return (
