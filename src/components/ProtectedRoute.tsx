@@ -1,17 +1,17 @@
-import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { Loader2 } from 'lucide-react';
+import { Navigate, useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { Loader2 } from "lucide-react";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAdmin?: boolean;
 }
 
-export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps) => {
+export const ProtectedRoute = ( { children, requireAdmin = false }: ProtectedRouteProps ) => {
   const { isAuthenticated, isAdmin, isLoading } = useAuth();
   const location = useLocation();
 
-  if (isLoading) {
+  if ( isLoading ) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-accent" />
@@ -19,13 +19,13 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
     );
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+  if ( !isAuthenticated ) {
+    return <Navigate to="/login" state={ { from: location } } replace />;
   }
 
-  if (requireAdmin && !isAdmin) {
+  if ( requireAdmin && !isAdmin ) {
     return <Navigate to="/" replace />;
   }
 
-  return <>{children}</>;
+  return <>{ children }</>;
 };

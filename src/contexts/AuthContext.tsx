@@ -3,94 +3,97 @@ import { authAPI } from '@/lib/api';
 
 interface User {
   _id: string;
-  name: string;
+  userName: string;
   email: string;
   role: 'user' | 'admin';
 }
 
 interface AuthContextType {
   user: User | null;
-  token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   isAdmin: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
-  logout: () => void;
-  updateUser: (userData: Partial<User>) => void;
+  login: ( email: string, password: string ) => Promise<void>;
+  register: ( username: string, email: string, password: string ) => Promise<void>;
+  logout: () => Promise<void>;
+  updateUser: ( userData: Partial<User> ) => void;
+  getAllUsers: () => Promise<User[]>;
+  deleteUser: ( userId: string ) => Promise<void>;
+  promoteToAdmin: ( userId: string ) => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | undefined>( undefined );
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+export const AuthProvider: React.FC<{ children: ReactNode }> = ( { children } ) => {
+  const [ user, setUser ] = useState<User | null>( null );
+  const [ isLoading, setIsLoading ] = useState( true );
 
-  useEffect(() => {
+  // Initial auth check
+  useEffect( () => {
     const initAuth = async () => {
-      const storedToken = localStorage.getItem('token');
-      const storedUser = localStorage.getItem('user');
-
-      if (storedToken && storedUser) {
-        setToken(storedToken);
-        setUser(JSON.parse(storedUser));
-        
-        // Verify token is still valid
-        try {
-          const response = await authAPI.getProfile();
-          setUser(response.data);
-          localStorage.setItem('user', JSON.stringify(response.data));
-        } catch {
-          logout();
-        }
+      try {
+        const response = await authAPI.getProfile(); // backend reads JWT from cookie
+        setUser( response.data );
+      } catch {
+        setUser( null );
+      } finally {
+        setIsLoading( false );
       }
-      setIsLoading(false);
     };
-
     initAuth();
-  }, []);
+  }, [] );
 
-  const login = async (email: string, password: string) => {
-    const response = await authAPI.login(email, password);
-    const { token: newToken, ...userData } = response.data;
-    
-    setToken(newToken);
-    setUser(userData);
-    localStorage.setItem('token', newToken);
-    localStorage.setItem('user', JSON.stringify(userData));
+  // Login
+  const login = async ( email: string, password: string ) => {
+    await authAPI.login( email, password ); // backend sets HttpOnly cookie
+    const response = await authAPI.getProfile(); // get current user
+    setUser( response.data );
   };
 
-  const register = async (name: string, email: string, password: string) => {
-    const response = await authAPI.register({ name, email, password });
-    const { token: newToken, ...userData } = response.data;
-    
-    setToken(newToken);
-    setUser(userData);
-    localStorage.setItem('token', newToken);
-    localStorage.setItem('user', JSON.stringify(userData));
+  // Register
+  const register = async ( username: string, email: string, password: string ) => {
+    await authAPI.register( { userName: username, email, password } );
+
+    const response = await authAPI.getProfile();
+    setUser( response.data );
   };
 
-  const logout = () => {
-    setUser(null);
-    setToken(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  // Logout
+  const logout = async () => {
+    // Optional: call backend logout endpoint if exists
+    setUser( null );
   };
 
-  const updateUser = (userData: Partial<User>) => {
-    if (user) {
-      const updatedUser = { ...user, ...userData };
-      setUser(updatedUser);
-      localStorage.setItem('user', JSON.stringify(updatedUser));
+  // Update local user state
+  const updateUser = ( userData: Partial<User> ) => {
+    if ( user ) {
+      setUser( { ...user, ...userData } );
     }
+  };
+
+  // Admin: get all users
+  const getAllUsers = async () => {
+    if ( !user || user.role !== 'admin' ) throw new Error( 'Admins only' );
+    const response = await authAPI.getUsers();
+    return response.data;
+  };
+
+  // Admin: delete user
+  const deleteUser = async ( userId: string ) => {
+    if ( !user || user.role !== 'admin' ) throw new Error( 'Admins only' );
+    await authAPI.deleteUser( userId );
+  };
+
+  // Admin: promote user to admin
+  const promoteToAdmin = async ( userId: string ) => {
+    if ( !user || user.role !== 'admin' ) throw new Error( 'Admins only' );
+    await authAPI.updateUserToAdmin( userId );
   };
 
   return (
     <AuthContext.Provider
-      value={{
+      value={ {
         user,
-        token,
         isLoading,
         isAuthenticated: !!user,
         isAdmin: user?.role === 'admin',
@@ -98,17 +101,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         register,
         logout,
         updateUser,
-      }}
+        getAllUsers,
+        deleteUser,
+        promoteToAdmin,
+      } }
     >
-      {children}
+      { children }
     </AuthContext.Provider>
   );
 };
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  const context = useContext( AuthContext );
+  if ( !context ) throw new Error( 'useAuth must be used within an AuthProvider' );
   return context;
 };

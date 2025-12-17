@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Loader2, Shield, Ban, Check } from 'lucide-react';
+import { Search, Loader2, Shield, Ban } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { adminAPI } from '@/lib/api';
+import axios from 'axios';
 import { useToast } from '@/hooks/use-toast';
 
 interface User {
   _id: string;
-  name: string;
+  userName: string;
   email: string;
   role: 'user' | 'admin';
   isActive?: boolean;
@@ -16,58 +16,58 @@ interface User {
 }
 
 const AdminUsers = () => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [search, setSearch] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [ users, setUsers ] = useState<User[]>( [] );
+  const [ search, setSearch ] = useState( '' );
+  const [ isLoading, setIsLoading ] = useState( true );
   const { toast } = useToast();
 
-  useEffect(() => {
+  useEffect( () => {
     fetchUsers();
-  }, []);
+  }, [] );
 
   const fetchUsers = async () => {
+    setIsLoading( true );
     try {
-      const response = await adminAPI.getUsers();
-      setUsers(response.data?.users || response.data || []);
-    } catch (error) {
-      setUsers([
-        { _id: '1', name: 'John Doe', email: 'john@email.com', role: 'user', isActive: true },
-        { _id: '2', name: 'Jane Admin', email: 'jane@email.com', role: 'admin', isActive: true },
-        { _id: '3', name: 'Mike User', email: 'mike@email.com', role: 'user', isActive: false },
-      ]);
+      const response = await axios.get( '/api/admin/users', { withCredentials: true } );
+      setUsers( response.data );
+    } catch ( error ) {
+      toast( { title: 'Error', description: 'Failed to fetch users', variant: 'destructive' } );
     } finally {
-      setIsLoading(false);
+      setIsLoading( false );
     }
   };
 
-  const handleToggleRole = async (user: User) => {
+  const handleToggleRole = async ( user: User ) => {
+    if ( user.role === 'admin' ) {
+      toast( { title: 'Info', description: 'Cannot demote admin via this action.' } );
+      return;
+    }
     try {
-      if (user.role !== 'admin') {
-        await adminAPI.updateUserToAdmin(user._id);
-        toast({ title: 'Role Updated', description: `${user.name} is now admin` });
-      } else {
-        toast({ title: 'Info', description: 'Cannot demote admin via this action.' });
-      }
+      await axios.put( '/api/admin/users/admin', { userId: user._id }, { withCredentials: true } );
+      toast( { title: 'Role Updated', description: `${ user.userName } is now admin` } );
       fetchUsers();
-    } catch (error) {
-      toast({ title: 'Error', description: 'Could not update role.', variant: 'destructive' });
+    } catch ( error ) {
+      toast( { title: 'Error', description: 'Could not update role', variant: 'destructive' } );
     }
   };
 
-  const handleDeleteUser = async (user: User) => {
-    if (!confirm(`Delete user ${user.name}?`)) return;
+  const handleDeleteUser = async ( user: User ) => {
+    if ( !confirm( `Delete user ${ user.userName }?` ) ) return;
     try {
-      await adminAPI.deleteUser(user._id);
-      toast({ title: 'User Deleted' });
+      await axios.delete( '/api/admin/users', {
+        data: { userId: user._id },
+        withCredentials: true
+      } );
+      toast( { title: 'User Deleted' } );
       fetchUsers();
-    } catch (error) {
-      toast({ title: 'Error', description: 'Could not delete user.', variant: 'destructive' });
+    } catch ( error ) {
+      toast( { title: 'Error', description: 'Could not delete user', variant: 'destructive' } );
     }
   };
 
-  const filteredUsers = users.filter((u) =>
-    u.name.toLowerCase().includes(search.toLowerCase()) ||
-    u.email.toLowerCase().includes(search.toLowerCase())
+  const filteredUsers = users.filter( ( u ) =>
+    u.userName.toLowerCase().includes( search.toLowerCase() ) ||
+    u.email.toLowerCase().includes( search.toLowerCase() )
   );
 
   return (
@@ -80,11 +80,16 @@ const AdminUsers = () => {
       <div className="mb-6">
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-          <Input placeholder="Search users..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
+          <Input
+            placeholder="Search users..."
+            value={ search }
+            onChange={ ( e ) => setSearch( e.target.value ) }
+            className="pl-10"
+          />
         </div>
       </div>
 
-      {isLoading ? (
+      { isLoading ? (
         <div className="flex justify-center py-12">
           <Loader2 className="w-8 h-8 animate-spin text-accent" />
         </div>
@@ -101,37 +106,35 @@ const AdminUsers = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredUsers.map((user, i) => (
+                { filteredUsers.map( ( user, i ) => (
                   <motion.tr
-                    key={user._id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: i * 0.05 }}
+                    key={ user._id }
+                    initial={ { opacity: 0 } }
+                    animate={ { opacity: 1 } }
+                    transition={ { delay: i * 0.05 } }
                     className="border-t border-border"
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center">
-                          <span className="text-accent font-semibold">{user.name.charAt(0)}</span>
+                          <span className="text-accent font-semibold">{ user.userName.charAt( 0 ) }</span>
                         </div>
                         <div>
-                          <p className="font-medium">{user.name}</p>
-                          <p className="text-sm text-muted-foreground">{user.email}</p>
+                          <p className="font-medium">{ user.userName }</p>
+                          <p className="text-sm text-muted-foreground">{ user.email }</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                        user.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
-                      }`}>
-                        {user.role}
+                      <span className={ `px-2 py-1 text-xs font-medium rounded-full ${ user.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+                        }` }>
+                        { user.role }
                       </span>
                     </td>
                     <td className="px-6 py-4 hidden md:table-cell">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                        user.isActive !== false ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                      }`}>
-                        {user.isActive !== false ? 'Active' : 'Inactive'}
+                      <span className={ `px-2 py-1 text-xs font-medium rounded-full ${ user.isActive !== false ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                        }` }>
+                        { user.isActive !== false ? 'Active' : 'Inactive' }
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -139,8 +142,8 @@ const AdminUsers = () => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleToggleRole(user)}
-                          title={user.role === 'admin' ? 'Remove admin' : 'Make admin'}
+                          onClick={ () => handleToggleRole( user ) }
+                          title={ user.role === 'admin' ? 'Remove admin' : 'Make admin' }
                         >
                           <Shield className="w-4 h-4" />
                         </Button>
@@ -148,7 +151,7 @@ const AdminUsers = () => {
                           variant="ghost"
                           size="icon"
                           className="text-destructive"
-                          onClick={() => handleDeleteUser(user)}
+                          onClick={ () => handleDeleteUser( user ) }
                           title="Delete user"
                         >
                           <Ban className="w-4 h-4" />
@@ -156,12 +159,12 @@ const AdminUsers = () => {
                       </div>
                     </td>
                   </motion.tr>
-                ))}
+                ) ) }
               </tbody>
             </table>
           </div>
         </div>
-      )}
+      ) }
     </div>
   );
 };
