@@ -41,23 +41,27 @@ const AdminUsers = () => {
   };
 
   const handleToggleRole = async (user: User) => {
-    const newRole = user.role === 'admin' ? 'user' : 'admin';
     try {
-      await adminAPI.updateUser(user._id, { role: newRole });
-      toast({ title: 'Role Updated', description: `${user.name} is now ${newRole}` });
+      if (user.role !== 'admin') {
+        await adminAPI.updateUserToAdmin(user._id);
+        toast({ title: 'Role Updated', description: `${user.name} is now admin` });
+      } else {
+        toast({ title: 'Info', description: 'Cannot demote admin via this action.' });
+      }
       fetchUsers();
     } catch (error) {
       toast({ title: 'Error', description: 'Could not update role.', variant: 'destructive' });
     }
   };
 
-  const handleToggleActive = async (user: User) => {
+  const handleDeleteUser = async (user: User) => {
+    if (!confirm(`Delete user ${user.name}?`)) return;
     try {
-      await adminAPI.updateUser(user._id, { isActive: !user.isActive });
-      toast({ title: user.isActive ? 'User Deactivated' : 'User Activated' });
+      await adminAPI.deleteUser(user._id);
+      toast({ title: 'User Deleted' });
       fetchUsers();
     } catch (error) {
-      toast({ title: 'Error', description: 'Could not update user.', variant: 'destructive' });
+      toast({ title: 'Error', description: 'Could not delete user.', variant: 'destructive' });
     }
   };
 
@@ -143,11 +147,11 @@ const AdminUsers = () => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className={user.isActive !== false ? 'text-destructive' : 'text-green-600'}
-                          onClick={() => handleToggleActive(user)}
-                          title={user.isActive !== false ? 'Deactivate' : 'Activate'}
+                          className="text-destructive"
+                          onClick={() => handleDeleteUser(user)}
+                          title="Delete user"
                         >
-                          {user.isActive !== false ? <Ban className="w-4 h-4" /> : <Check className="w-4 h-4" />}
+                          <Ban className="w-4 h-4" />
                         </Button>
                       </div>
                     </td>
