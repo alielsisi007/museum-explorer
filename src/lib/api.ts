@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Backend live URL
-const API_BASE_URL = 'https://mern-product-production.up.railway.app';
+// Backend base URL - prefer VITE_API_URL for local dev, fall back to production
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://mern-product-production.up.railway.app';
 
 // Axios instance
 export const api = axios.create({

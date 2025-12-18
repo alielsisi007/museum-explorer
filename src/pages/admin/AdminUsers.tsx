@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Search, Loader2, Shield, Ban } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import axios from 'axios';
+import { adminAPI } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 
 interface User {
@@ -28,10 +28,13 @@ const AdminUsers = () => {
   const fetchUsers = async () => {
     setIsLoading( true );
     try {
-      const response = await axios.get( '/api/admin/users', { withCredentials: true } );
-      setUsers( response.data );
+      const response = await adminAPI.getUsers();
+      // adminAPI.getUsers returns array of users
+      setUsers( response.data || [] );
     } catch ( error ) {
-      toast( { title: 'Error', description: 'Failed to fetch users', variant: 'destructive' } );
+      console.error( 'Fetch users error', error );
+      const msg = error?.response?.data?.message || 'Failed to fetch users';
+      toast( { title: 'Error', description: msg, variant: 'destructive' } );
     } finally {
       setIsLoading( false );
     }
@@ -43,25 +46,26 @@ const AdminUsers = () => {
       return;
     }
     try {
-      await axios.put( '/api/admin/users/admin', { userId: user._id }, { withCredentials: true } );
+      await adminAPI.updateUserToAdmin( user._id );
       toast( { title: 'Role Updated', description: `${ user.userName } is now admin` } );
       fetchUsers();
     } catch ( error ) {
-      toast( { title: 'Error', description: 'Could not update role', variant: 'destructive' } );
+      console.error( 'Update role error', error );
+      const msg = error?.response?.data?.message || 'Could not update role';
+      toast( { title: 'Error', description: msg, variant: 'destructive' } );
     }
   };
 
   const handleDeleteUser = async ( user: User ) => {
     if ( !confirm( `Delete user ${ user.userName }?` ) ) return;
     try {
-      await axios.delete( '/api/admin/users', {
-        data: { userId: user._id },
-        withCredentials: true
-      } );
+      await adminAPI.deleteUser( user._id );
       toast( { title: 'User Deleted' } );
       fetchUsers();
     } catch ( error ) {
-      toast( { title: 'Error', description: 'Could not delete user', variant: 'destructive' } );
+      console.error( 'Delete user error', error );
+      const msg = error?.response?.data?.message || 'Could not delete user';
+      toast( { title: 'Error', description: msg, variant: 'destructive' } );
     }
   };
 
