@@ -23,6 +23,7 @@ const Profile = () => {
   const { user } = useAuth();
   const [ bookings, setBookings ] = useState<Booking[]>( [] );
   const [ isLoading, setIsLoading ] = useState( true );
+  const [ fetchError, setFetchError ] = useState<string | null>( null );
 
   useEffect( () => {
     const fetchBookings = async () => {
@@ -33,6 +34,7 @@ const Profile = () => {
         setBookings( response.data?.bookings || response.data || [] );
       } catch ( error ) {
         console.log( 'Could not fetch bookings', error );
+        setFetchError( ( error as any )?.response?.data?.message || ( error as any )?.message || 'Could not fetch bookings' );
       } finally {
         setIsLoading( false );
       }
@@ -62,6 +64,13 @@ const Profile = () => {
               ) }
             </div>
           </motion.div>
+          {/* Debug info: expand to see raw user & bookings returned by the API */ }
+          <div className="mt-4">
+            <details className="bg-card p-4 rounded">
+              <summary className="cursor-pointer font-medium">Debug: user & bookings (open)</summary>
+              <pre className="whitespace-pre-wrap text-sm mt-2">{ JSON.stringify( { user, bookings, fetchError }, null, 2 ) }</pre>
+            </details>
+          </div>
         </div>
       </section>
 
