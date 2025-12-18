@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import { User, Mail, Ticket, Calendar, Loader2 } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { bookingsAPI } from '@/lib/api';
@@ -56,6 +57,9 @@ const Profile = () => {
                 { user?.name || user?.userName }
               </h1>
               <p className="text-primary-foreground/70">{ user?.email }</p>
+              { user?.createdAt && (
+                <p className="text-primary-foreground/60 text-sm">Member since { format( new Date( user.createdAt ), 'PPP' ) }</p>
+              ) }
             </div>
           </motion.div>
         </div>

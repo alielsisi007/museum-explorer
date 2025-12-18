@@ -6,6 +6,8 @@ interface User {
   userName: string;
   email: string;
   role: 'user' | 'admin';
+  name?: string;
+  createdAt?: string;
 }
 
 interface AuthContextType {
@@ -52,7 +54,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ( { children } ) 
 
   // Register
   const register = async ( username: string, email: string, password: string ) => {
-    await authAPI.register( { userName: username, email, password } );
+    // authAPI.register expects { name, email, password }
+    await authAPI.register( { name: username, email, password } );
 
     const response = await authAPI.getProfile();
     setUser( response.data );
