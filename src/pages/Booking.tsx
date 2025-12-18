@@ -10,8 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import axios from 'axios';
-import { ticketsAPI } from '@/lib/api';
+import { ticketsAPI, bookingsAPI } from '@/lib/api';
 
 interface TicketType {
   _id: string;
@@ -85,19 +84,19 @@ const Booking = () => {
       // Simulate payment
       await new Promise( resolve => setTimeout( resolve, 2000 ) );
 
-      // Prepare booking payload
+      // Prepare booking payload (match backend expected shape)
       const bookingsPayload = ticketTypes
-        .filter( type => quantities[ type._id ] > 0 )
+        .filter( type => ( quantities[ type._id ] || 0 ) > 0 )
         .map( type => ( {
-          eventName: type.name,
-          eventDate: date?.toISOString(),
-          ticketPrice: type.price,
-          ticketCount: quantities[ type._id ],
+          ticketType: type.name,
+          quantity: quantities[ type._id ],
+          visitDate: date?.toISOString(),
+          totalPrice: type.price * ( quantities[ type._id ] || 0 ),
         } ) );
 
-      // Send bookings to backend
-      for ( let booking of bookingsPayload ) {
-        await axios.post( '/bookings', booking, { withCredentials: true } );
+      // Send bookings to backend via centralized bookingsAPI
+      for ( const booking of bookingsPayload ) {
+        await bookingsAPI.create( booking );
       }
 
       setStep( 'confirmation' );
