@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Users, Ticket, Image, TrendingUp, DollarSign, Calendar } from 'lucide-react';
-import { adminAPI } from '@/lib/api';
+import { adminAPI, bookingsAPI, exhibitsAPI } from '@/lib/api';
+import { format } from 'date-fns';
 
 interface Stats {
   totalUsers: number;
@@ -11,33 +12,55 @@ interface Stats {
 }
 
 const AdminDashboard = () => {
-  const [stats, setStats] = useState<Stats>({
+  const [ stats, setStats ] = useState<Stats>( {
     totalUsers: 0,
     totalBookings: 0,
     totalRevenue: 0,
     totalExhibits: 0,
-  });
-  const [isLoading, setIsLoading] = useState(true);
+  } );
+  const [ isLoading, setIsLoading ] = useState( true );
+  const [ recentBookings, setRecentBookings ] = useState<any[]>( [] );
+  const [ events, setEvents ] = useState<any[]>( [] );
+  const [ isLoadingRecents, setIsLoadingRecents ] = useState( true );
 
-  useEffect(() => {
+  useEffect( () => {
     const fetchStats = async () => {
       try {
         const response = await adminAPI.getStats();
-        setStats(response.data);
-      } catch (error) {
+        setStats( response.data );
+      } catch ( error ) {
         // Use fallback data
-        setStats({
+        setStats( {
           totalUsers: 1250,
           totalBookings: 3420,
           totalRevenue: 85600,
           totalExhibits: 42,
-        });
+        } );
       } finally {
-        setIsLoading(false);
+        setIsLoading( false );
       }
     };
     fetchStats();
-  }, []);
+    // fetch recent bookings and upcoming exhibits in parallel
+    const fetchRecents = async () => {
+      setIsLoadingRecents( true );
+      try {
+        const [ bookingsRes, exhibitsRes ] = await Promise.all( [
+          bookingsAPI.getAll( { page: 1, limit: 5 } ),
+          exhibitsAPI.getAll( { page: 1, limit: 4 } ),
+        ] );
+
+        setRecentBookings( bookingsRes.data?.bookings || [] );
+        setEvents( exhibitsRes.data?.exhibits || [] );
+      } catch ( err ) {
+        // keep arrays empty on failure
+        console.error( 'Failed to load recents', err );
+      } finally {
+        setIsLoadingRecents( false );
+      }
+    };
+    fetchRecents();
+  }, [] );
 
   const statCards = [
     {
@@ -56,7 +79,7 @@ const AdminDashboard = () => {
     },
     {
       title: 'Revenue',
-      value: `$${stats.totalRevenue.toLocaleString()}`,
+      value: `$${ stats.totalRevenue.toLocaleString() }`,
       icon: DollarSign,
       trend: '+23%',
       color: 'bg-accent',
@@ -77,38 +100,38 @@ const AdminDashboard = () => {
         <p className="text-muted-foreground">Welcome to the admin dashboard</p>
       </div>
 
-      {/* Stats Grid */}
+      {/* Stats Grid */ }
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {statCards.map((stat, index) => (
+        { statCards.map( ( stat, index ) => (
           <motion.div
-            key={stat.title}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
+            key={ stat.title }
+            initial={ { opacity: 0, y: 20 } }
+            animate={ { opacity: 1, y: 0 } }
+            transition={ { delay: index * 0.1 } }
             className="bg-card p-6 rounded-xl shadow-soft"
           >
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-muted-foreground text-sm">{stat.title}</p>
-                <p className="text-2xl font-bold mt-1">{isLoading ? '—' : stat.value}</p>
+                <p className="text-muted-foreground text-sm">{ stat.title }</p>
+                <p className="text-2xl font-bold mt-1">{ isLoading ? '—' : stat.value }</p>
                 <div className="flex items-center gap-1 mt-2 text-green-600 text-sm">
                   <TrendingUp className="w-4 h-4" />
-                  <span>{stat.trend}</span>
+                  <span>{ stat.trend }</span>
                 </div>
               </div>
-              <div className={`${stat.color} p-3 rounded-lg`}>
+              <div className={ `${ stat.color } p-3 rounded-lg` }>
                 <stat.icon className="w-6 h-6 text-white" />
               </div>
             </div>
           </motion.div>
-        ))}
+        ) ) }
       </div>
 
-      {/* Recent Activity */}
+      {/* Recent Activity */ }
       <div className="grid lg:grid-cols-2 gap-6">
         <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
+          initial={ { opacity: 0, x: -20 } }
+          animate={ { opacity: 1, x: 0 } }
           className="bg-card p-6 rounded-xl shadow-soft"
         >
           <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -116,29 +139,30 @@ const AdminDashboard = () => {
             Recent Bookings
           </h2>
           <div className="space-y-4">
-            {[
-              { name: 'John Doe', date: 'Dec 15', tickets: 3, amount: 75 },
-              { name: 'Jane Smith', date: 'Dec 14', tickets: 2, amount: 50 },
-              { name: 'Mike Johnson', date: 'Dec 14', tickets: 5, amount: 125 },
-              { name: 'Sarah Wilson', date: 'Dec 13', tickets: 1, amount: 25 },
-            ].map((booking, i) => (
-              <div key={i} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                <div>
-                  <p className="font-medium">{booking.name}</p>
-                  <p className="text-sm text-muted-foreground">{booking.tickets} tickets</p>
+            { isLoadingRecents ? (
+              <div className="flex justify-center py-6">Loading…</div>
+            ) : recentBookings.length === 0 ? (
+              <div className="text-sm text-muted-foreground">No recent bookings</div>
+            ) : (
+              recentBookings.map( ( b, i ) => (
+                <div key={ b._id || i } className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                  <div>
+                    <p className="font-medium">{ b.user?.userName || b.user?.userName || 'Guest' }</p>
+                    <p className="text-sm text-muted-foreground">{ ( b.user && b.user.email ) || '—' }</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold text-accent">${ b.totalPrice }</p>
+                    <p className="text-sm text-muted-foreground">{ format( new Date( b.visitDate || b.createdAt ), 'MMM d' ) }</p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="font-semibold text-accent">${booking.amount}</p>
-                  <p className="text-sm text-muted-foreground">{booking.date}</p>
-                </div>
-              </div>
-            ))}
+              ) )
+            ) }
           </div>
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
+          initial={ { opacity: 0, x: 20 } }
+          animate={ { opacity: 1, x: 0 } }
           className="bg-card p-6 rounded-xl shadow-soft"
         >
           <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -146,22 +170,21 @@ const AdminDashboard = () => {
             Upcoming Events
           </h2>
           <div className="space-y-4">
-            {[
-              { title: 'Night at the Museum', date: 'Dec 20', attendees: 150 },
-              { title: 'Holiday Exhibition', date: 'Dec 25', attendees: 300 },
-              { title: 'Artist Meet & Greet', date: 'Jan 5', attendees: 75 },
-              { title: 'New Year Special', date: 'Jan 1', attendees: 200 },
-            ].map((event, i) => (
-              <div key={i} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                <div>
-                  <p className="font-medium">{event.title}</p>
-                  <p className="text-sm text-muted-foreground">{event.date}</p>
+            { isLoadingRecents ? (
+              <div className="flex justify-center py-6">Loading…</div>
+            ) : events.length === 0 ? (
+              <div className="text-sm text-muted-foreground">No upcoming events</div>
+            ) : (
+              events.map( ( event, i ) => (
+                <div key={ event._id || i } className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                  <div>
+                    <p className="font-medium">{ event.name || event.title }</p>
+                    <p className="text-sm text-muted-foreground">{ event.location || format( new Date( event.createdAt || event.updatedAt || Date.now() ), 'MMM d' ) }</p>
+                  </div>
+                  <span className="text-sm bg-secondary px-3 py-1 rounded-full">View</span>
                 </div>
-                <span className="text-sm bg-secondary px-3 py-1 rounded-full">
-                  {event.attendees} attendees
-                </span>
-              </div>
-            ))}
+              ) )
+            ) }
           </div>
         </motion.div>
       </div>
