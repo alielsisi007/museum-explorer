@@ -107,43 +107,44 @@ const AdminUsers = () => {
                 initial={ { opacity: 0 } }
                 animate={ { opacity: 1 } }
                 transition={ { delay: i * 0.05 } }
-                className="bg-card p-4 rounded-xl shadow-soft"
+                className="bg-card p-3 sm:p-4 rounded-xl shadow-soft overflow-hidden"
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center">
-                      <span className="text-accent font-semibold">{ user.userName.charAt( 0 ) }</span>
-                    </div>
-                    <div>
-                      <p className="font-medium">{ user.userName }</p>
-                      <p className="text-sm text-muted-foreground">{ user.email }</p>
-                    </div>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center shrink-0">
+                    <span className="text-accent font-semibold">{ user.userName.charAt( 0 ) }</span>
                   </div>
-                  <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={ () => handleToggleRole( user ) }
-                    >
-                      <Shield className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-destructive"
-                      onClick={ () => handleDeleteUser( user ) }
-                    >
-                      <Ban className="w-4 h-4" />
-                    </Button>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium truncate">{ user.userName }</p>
+                    <p className="text-sm text-muted-foreground break-all line-clamp-2">{ user.email }</p>
                   </div>
                 </div>
-                <div className="flex gap-2 mt-3">
+                <div className="flex flex-wrap gap-2 mb-3">
                   <span className={ `px-2 py-1 text-xs font-medium rounded-full ${ user.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700' }` }>
                     { user.role }
                   </span>
                   <span className={ `px-2 py-1 text-xs font-medium rounded-full ${ user.isActive !== false ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }` }>
                     { user.isActive !== false ? 'Active' : 'Inactive' }
                   </span>
+                </div>
+                <div className="flex flex-wrap gap-2 pt-2 border-t border-border">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 min-w-[100px]"
+                    onClick={ () => handleToggleRole( user ) }
+                  >
+                    <Shield className="w-4 h-4 mr-1" />
+                    { user.role === 'admin' ? 'Admin' : 'Make Admin' }
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="flex-1 min-w-[100px]"
+                    onClick={ () => handleDeleteUser( user ) }
+                  >
+                    <Ban className="w-4 h-4 mr-1" />
+                    Delete
+                  </Button>
                 </div>
               </motion.div>
             ) ) }
