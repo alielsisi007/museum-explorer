@@ -133,20 +133,20 @@ const AdminExhibits = () => {
   );
 
   return (
-    <div>
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+    <div className="px-2 sm:px-0">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 md:mb-8">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-foreground">Exhibits</h1>
-          <p className="text-muted-foreground">Manage museum exhibits</p>
+          <h1 className="text-2xl md:text-3xl font-serif font-bold text-foreground">Exhibits</h1>
+          <p className="text-sm md:text-base text-muted-foreground">Manage museum exhibits</p>
         </div>
         <Dialog open={ isModalOpen } onOpenChange={ setIsModalOpen }>
           <DialogTrigger asChild>
-            <Button className="btn-gold" onClick={ () => { setEditingExhibit( null ); setFormData( { name: '', description: '', location: '', category: '' } ); setSelectedFiles( [] ); setPreviews( [] ); } }>
+            <Button className="btn-gold w-full sm:w-auto" onClick={ () => { setEditingExhibit( null ); setFormData( { name: '', description: '', location: '', category: '' } ); setSelectedFiles( [] ); setPreviews( [] ); } }>
               <Plus className="w-4 h-4 mr-2" />
               Add Exhibit
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{ editingExhibit ? 'Edit Exhibit' : 'Add New Exhibit' }</DialogTitle>
             </DialogHeader>
@@ -176,18 +176,18 @@ const AdminExhibits = () => {
                   accept="image/*"
                   multiple
                   onChange={ handleFileChange }
-                  className="mt-2"
+                  className="mt-2 w-full"
                 />
                 { previews.length > 0 ? (
-                  <div className="flex gap-2 mt-3">
+                  <div className="flex flex-wrap gap-2 mt-3">
                     { previews.map( ( p, idx ) => (
-                      <img key={ idx } src={ p } alt={ `preview-${ idx }` } className="w-20 h-20 object-cover rounded" />
+                      <img key={ idx } src={ p } alt={ `preview-${ idx }` } className="w-16 h-16 md:w-20 md:h-20 object-cover rounded" />
                     ) ) }
                   </div>
                 ) : (
                   editingExhibit?.image && (
                     <div className="mt-3">
-                      <img src={ editingExhibit.image } alt="current" className="w-32 h-20 object-cover rounded" />
+                      <img src={ editingExhibit.image } alt="current" className="w-24 h-16 md:w-32 md:h-20 object-cover rounded" />
                     </div>
                   )
                 ) }
@@ -200,8 +200,8 @@ const AdminExhibits = () => {
         </Dialog>
       </div>
 
-      <div className="mb-6">
-        <div className="relative max-w-sm">
+      <div className="mb-4 md:mb-6">
+        <div className="relative w-full md:max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <Input placeholder="Search exhibits..." value={ search } onChange={ ( e ) => setSearch( e.target.value ) } className="pl-10" />
         </div>
@@ -212,52 +212,91 @@ const AdminExhibits = () => {
           <Loader2 className="w-8 h-8 animate-spin text-accent" />
         </div>
       ) : (
-        <div className="bg-card rounded-xl shadow-soft overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-secondary">
-                <tr>
-                  <th className="text-left px-6 py-4 font-medium">Name</th>
-                  <th className="text-left px-6 py-4 font-medium hidden md:table-cell">Category</th>
-                  <th className="text-left px-6 py-4 font-medium hidden lg:table-cell">Location</th>
-                  <th className="text-right px-6 py-4 font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                { filteredExhibits.map( ( exhibit, i ) => (
-                  <motion.tr
-                    key={ exhibit._id }
-                    initial={ { opacity: 0 } }
-                    animate={ { opacity: 1 } }
-                    transition={ { delay: i * 0.05 } }
-                    className="border-t border-border"
-                  >
-                    <td className="px-6 py-4">
-                      <div>
-                        <p className="font-medium">{ exhibit.name }</p>
-                        <p className="text-sm text-muted-foreground line-clamp-1">{ exhibit.description }</p>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 hidden md:table-cell">
-                      <span className="px-2 py-1 bg-accent/10 text-accent text-sm rounded">{ exhibit.category || '—' }</span>
-                    </td>
-                    <td className="px-6 py-4 hidden lg:table-cell text-muted-foreground">{ exhibit.location || '—' }</td>
-                    <td className="px-6 py-4">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon" onClick={ () => openEdit( exhibit ) }>
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="text-destructive" onClick={ () => handleDelete( exhibit._id ) }>
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </td>
-                  </motion.tr>
-                ) ) }
-              </tbody>
-            </table>
+        <>
+          {/* Mobile card layout */}
+          <div className="md:hidden space-y-3">
+            { filteredExhibits.map( ( exhibit, i ) => (
+              <motion.div
+                key={ exhibit._id }
+                initial={ { opacity: 0 } }
+                animate={ { opacity: 1 } }
+                transition={ { delay: i * 0.05 } }
+                className="bg-card p-4 rounded-xl shadow-soft"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">{ exhibit.name }</p>
+                    <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{ exhibit.description }</p>
+                  </div>
+                  <div className="flex gap-1 ml-2">
+                    <Button variant="ghost" size="icon" onClick={ () => openEdit( exhibit ) }>
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="text-destructive" onClick={ () => handleDelete( exhibit._id ) }>
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2 mt-3">
+                  { exhibit.category && (
+                    <span className="px-2 py-1 bg-accent/10 text-accent text-xs rounded">{ exhibit.category }</span>
+                  ) }
+                  { exhibit.location && (
+                    <span className="text-xs text-muted-foreground">{ exhibit.location }</span>
+                  ) }
+                </div>
+              </motion.div>
+            ) ) }
           </div>
-        </div>
+
+          {/* Desktop table layout */}
+          <div className="hidden md:block bg-card rounded-xl shadow-soft overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-secondary">
+                  <tr>
+                    <th className="text-left px-6 py-4 font-medium">Name</th>
+                    <th className="text-left px-6 py-4 font-medium">Category</th>
+                    <th className="text-left px-6 py-4 font-medium hidden lg:table-cell">Location</th>
+                    <th className="text-right px-6 py-4 font-medium">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  { filteredExhibits.map( ( exhibit, i ) => (
+                    <motion.tr
+                      key={ exhibit._id }
+                      initial={ { opacity: 0 } }
+                      animate={ { opacity: 1 } }
+                      transition={ { delay: i * 0.05 } }
+                      className="border-t border-border"
+                    >
+                      <td className="px-6 py-4">
+                        <div>
+                          <p className="font-medium">{ exhibit.name }</p>
+                          <p className="text-sm text-muted-foreground line-clamp-1">{ exhibit.description }</p>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="px-2 py-1 bg-accent/10 text-accent text-sm rounded">{ exhibit.category || '—' }</span>
+                      </td>
+                      <td className="px-6 py-4 hidden lg:table-cell text-muted-foreground">{ exhibit.location || '—' }</td>
+                      <td className="px-6 py-4">
+                        <div className="flex justify-end gap-2">
+                          <Button variant="ghost" size="icon" onClick={ () => openEdit( exhibit ) }>
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="text-destructive" onClick={ () => handleDelete( exhibit._id ) }>
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </motion.tr>
+                  ) ) }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
       ) }
     </div>
   );

@@ -75,14 +75,14 @@ const AdminUsers = () => {
   );
 
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-serif font-bold text-foreground">Users</h1>
-        <p className="text-muted-foreground">Manage user accounts and permissions</p>
+    <div className="px-2 sm:px-0">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-serif font-bold text-foreground">Users</h1>
+        <p className="text-sm md:text-base text-muted-foreground">Manage user accounts and permissions</p>
       </div>
 
-      <div className="mb-6">
-        <div className="relative max-w-sm">
+      <div className="mb-4 md:mb-6">
+        <div className="relative w-full md:max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <Input
             placeholder="Search users..."
@@ -98,76 +98,127 @@ const AdminUsers = () => {
           <Loader2 className="w-8 h-8 animate-spin text-accent" />
         </div>
       ) : (
-        <div className="bg-card rounded-xl shadow-soft overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-secondary">
-                <tr>
-                  <th className="text-left px-6 py-4 font-medium">User</th>
-                  <th className="text-left px-6 py-4 font-medium">Role</th>
-                  <th className="text-left px-6 py-4 font-medium hidden md:table-cell">Status</th>
-                  <th className="text-right px-6 py-4 font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                { filteredUsers.map( ( user, i ) => (
-                  <motion.tr
-                    key={ user._id }
-                    initial={ { opacity: 0 } }
-                    animate={ { opacity: 1 } }
-                    transition={ { delay: i * 0.05 } }
-                    className="border-t border-border"
-                  >
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center">
-                          <span className="text-accent font-semibold">{ user.userName.charAt( 0 ) }</span>
-                        </div>
-                        <div>
-                          <p className="font-medium">{ user.userName }</p>
-                          <p className="text-sm text-muted-foreground">{ user.email }</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={ `px-2 py-1 text-xs font-medium rounded-full ${ user.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
-                        }` }>
-                        { user.role }
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 hidden md:table-cell">
-                      <span className={ `px-2 py-1 text-xs font-medium rounded-full ${ user.isActive !== false ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                        }` }>
-                        { user.isActive !== false ? 'Active' : 'Inactive' }
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={ () => handleToggleRole( user ) }
-                          title={ user.role === 'admin' ? 'Remove admin' : 'Make admin' }
-                        >
-                          <Shield className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-destructive"
-                          onClick={ () => handleDeleteUser( user ) }
-                          title="Delete user"
-                        >
-                          <Ban className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </td>
-                  </motion.tr>
-                ) ) }
-              </tbody>
-            </table>
+        <>
+          {/* Mobile card layout */}
+          <div className="md:hidden space-y-3">
+            { filteredUsers.map( ( user, i ) => (
+              <motion.div
+                key={ user._id }
+                initial={ { opacity: 0 } }
+                animate={ { opacity: 1 } }
+                transition={ { delay: i * 0.05 } }
+                className="bg-card p-4 rounded-xl shadow-soft"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center">
+                      <span className="text-accent font-semibold">{ user.userName.charAt( 0 ) }</span>
+                    </div>
+                    <div>
+                      <p className="font-medium">{ user.userName }</p>
+                      <p className="text-sm text-muted-foreground">{ user.email }</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={ () => handleToggleRole( user ) }
+                    >
+                      <Shield className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-destructive"
+                      onClick={ () => handleDeleteUser( user ) }
+                    >
+                      <Ban className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex gap-2 mt-3">
+                  <span className={ `px-2 py-1 text-xs font-medium rounded-full ${ user.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700' }` }>
+                    { user.role }
+                  </span>
+                  <span className={ `px-2 py-1 text-xs font-medium rounded-full ${ user.isActive !== false ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }` }>
+                    { user.isActive !== false ? 'Active' : 'Inactive' }
+                  </span>
+                </div>
+              </motion.div>
+            ) ) }
           </div>
-        </div>
+
+          {/* Desktop table layout */}
+          <div className="hidden md:block bg-card rounded-xl shadow-soft overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-secondary">
+                  <tr>
+                    <th className="text-left px-6 py-4 font-medium">User</th>
+                    <th className="text-left px-6 py-4 font-medium">Role</th>
+                    <th className="text-left px-6 py-4 font-medium">Status</th>
+                    <th className="text-right px-6 py-4 font-medium">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  { filteredUsers.map( ( user, i ) => (
+                    <motion.tr
+                      key={ user._id }
+                      initial={ { opacity: 0 } }
+                      animate={ { opacity: 1 } }
+                      transition={ { delay: i * 0.05 } }
+                      className="border-t border-border"
+                    >
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center">
+                            <span className="text-accent font-semibold">{ user.userName.charAt( 0 ) }</span>
+                          </div>
+                          <div>
+                            <p className="font-medium">{ user.userName }</p>
+                            <p className="text-sm text-muted-foreground">{ user.email }</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={ `px-2 py-1 text-xs font-medium rounded-full ${ user.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700' }` }>
+                          { user.role }
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={ `px-2 py-1 text-xs font-medium rounded-full ${ user.isActive !== false ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }` }>
+                          { user.isActive !== false ? 'Active' : 'Inactive' }
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={ () => handleToggleRole( user ) }
+                            title={ user.role === 'admin' ? 'Remove admin' : 'Make admin' }
+                          >
+                            <Shield className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive"
+                            onClick={ () => handleDeleteUser( user ) }
+                            title="Delete user"
+                          >
+                            <Ban className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </motion.tr>
+                  ) ) }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
       ) }
     </div>
   );
