@@ -65,13 +65,13 @@ const AdminBookings = () => {
   );
 
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Bookings</h1>
-        <p className="text-muted-foreground">View and manage all bookings</p>
+    <div className="px-2 sm:px-0">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold">Bookings</h1>
+        <p className="text-sm md:text-base text-muted-foreground">View and manage all bookings</p>
       </div>
 
-      <div className="mb-6 max-w-sm relative">
+      <div className="mb-4 md:mb-6 w-full md:max-w-sm relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
         <Input
           placeholder="Search by name or email..."
@@ -86,69 +86,118 @@ const AdminBookings = () => {
           <Loader2 className="w-8 h-8 animate-spin text-accent" />
         </div>
       ) : (
-        <div className="bg-card rounded-xl shadow-soft overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-secondary">
-                <tr>
-                  <th className="text-left px-6 py-4 font-medium">Customer</th>
-                  <th className="text-left px-6 py-4 font-medium hidden md:table-cell">Visit Date</th>
-                  <th className="text-left px-6 py-4 font-medium hidden lg:table-cell">Tickets</th>
-                  <th className="text-left px-6 py-4 font-medium">Amount</th>
-                  <th className="text-left px-6 py-4 font-medium">Status</th>
-                  <th className="text-right px-6 py-4 font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                { filteredBookings.map( ( booking, i ) => (
-                  <motion.tr
-                    key={ booking._id }
-                    initial={ { opacity: 0 } }
-                    animate={ { opacity: 1 } }
-                    transition={ { delay: i * 0.05 } }
-                    className="border-t border-border"
-                  >
-                    <td className="px-6 py-4">
-                      <div>
-                        <p className="font-medium">{ booking.user?.userName || "Guest" }</p>
-                        <p className="text-sm text-muted-foreground">{ booking.user?.email || "—" }</p>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 hidden md:table-cell">
-                      { format( new Date( booking.visitDate ), "MMM d, yyyy" ) }
-                    </td>
-                    <td className="px-6 py-4 hidden lg:table-cell">
-                      { booking.quantity } × { booking.ticketType?.name || "Ticket" }
-                    </td>
-                    <td className="px-6 py-4 font-semibold text-accent">${ booking.totalPrice }</td>
-                    <td className="px-6 py-4">
-                      <span className={ `px-2 py-1 text-xs font-medium rounded-full ${ getStatusColor( booking.status ) }` }>
-                        { booking.status }
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon">
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        { booking.status !== "cancelled" && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-destructive"
-                            onClick={ () => handleCancel( booking._id ) }
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
-                        ) }
-                      </div>
-                    </td>
-                  </motion.tr>
-                ) ) }
-              </tbody>
-            </table>
+        <>
+          {/* Mobile card layout */}
+          <div className="md:hidden space-y-3">
+            { filteredBookings.map( ( booking, i ) => (
+              <motion.div
+                key={ booking._id }
+                initial={ { opacity: 0 } }
+                animate={ { opacity: 1 } }
+                transition={ { delay: i * 0.05 } }
+                className="bg-card p-4 rounded-xl shadow-soft"
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="font-medium">{ booking.user?.userName || "Guest" }</p>
+                    <p className="text-sm text-muted-foreground">{ booking.user?.email || "—" }</p>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="icon">
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                    { booking.status !== "cancelled" && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive"
+                        onClick={ () => handleCancel( booking._id ) }
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    ) }
+                  </div>
+                </div>
+                <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
+                  <span className="text-muted-foreground">{ format( new Date( booking.visitDate ), "MMM d, yyyy" ) }</span>
+                  <span className="text-muted-foreground">•</span>
+                  <span>{ booking.quantity } × { booking.ticketType?.name || "Ticket" }</span>
+                </div>
+                <div className="mt-2 flex items-center justify-between">
+                  <span className="font-semibold text-accent">${ booking.totalPrice }</span>
+                  <span className={ `px-2 py-1 text-xs font-medium rounded-full ${ getStatusColor( booking.status ) }` }>
+                    { booking.status }
+                  </span>
+                </div>
+              </motion.div>
+            ) ) }
           </div>
-        </div>
+
+          {/* Desktop table layout */}
+          <div className="hidden md:block bg-card rounded-xl shadow-soft overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-secondary">
+                  <tr>
+                    <th className="text-left px-6 py-4 font-medium">Customer</th>
+                    <th className="text-left px-6 py-4 font-medium">Visit Date</th>
+                    <th className="text-left px-6 py-4 font-medium hidden lg:table-cell">Tickets</th>
+                    <th className="text-left px-6 py-4 font-medium">Amount</th>
+                    <th className="text-left px-6 py-4 font-medium">Status</th>
+                    <th className="text-right px-6 py-4 font-medium">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  { filteredBookings.map( ( booking, i ) => (
+                    <motion.tr
+                      key={ booking._id }
+                      initial={ { opacity: 0 } }
+                      animate={ { opacity: 1 } }
+                      transition={ { delay: i * 0.05 } }
+                      className="border-t border-border"
+                    >
+                      <td className="px-6 py-4">
+                        <div>
+                          <p className="font-medium">{ booking.user?.userName || "Guest" }</p>
+                          <p className="text-sm text-muted-foreground">{ booking.user?.email || "—" }</p>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        { format( new Date( booking.visitDate ), "MMM d, yyyy" ) }
+                      </td>
+                      <td className="px-6 py-4 hidden lg:table-cell">
+                        { booking.quantity } × { booking.ticketType?.name || "Ticket" }
+                      </td>
+                      <td className="px-6 py-4 font-semibold text-accent">${ booking.totalPrice }</td>
+                      <td className="px-6 py-4">
+                        <span className={ `px-2 py-1 text-xs font-medium rounded-full ${ getStatusColor( booking.status ) }` }>
+                          { booking.status }
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex justify-end gap-2">
+                          <Button variant="ghost" size="icon">
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          { booking.status !== "cancelled" && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-destructive"
+                              onClick={ () => handleCancel( booking._id ) }
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          ) }
+                        </div>
+                      </td>
+                    </motion.tr>
+                  ) ) }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
       ) }
     </div>
   );

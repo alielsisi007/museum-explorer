@@ -94,33 +94,33 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-serif font-bold text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome to the admin dashboard</p>
+    <div className="px-2 sm:px-0">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-serif font-bold text-foreground">Dashboard</h1>
+        <p className="text-sm md:text-base text-muted-foreground">Welcome to the admin dashboard</p>
       </div>
 
       {/* Stats Grid */ }
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
         { statCards.map( ( stat, index ) => (
           <motion.div
             key={ stat.title }
             initial={ { opacity: 0, y: 20 } }
             animate={ { opacity: 1, y: 0 } }
             transition={ { delay: index * 0.1 } }
-            className="bg-card p-6 rounded-xl shadow-soft"
+            className="bg-card p-4 md:p-6 rounded-xl shadow-soft"
           >
             <div className="flex items-start justify-between">
-              <div>
-                <p className="text-muted-foreground text-sm">{ stat.title }</p>
-                <p className="text-2xl font-bold mt-1">{ isLoading ? '—' : stat.value }</p>
-                <div className="flex items-center gap-1 mt-2 text-green-600 text-sm">
-                  <TrendingUp className="w-4 h-4" />
+              <div className="min-w-0 flex-1">
+                <p className="text-muted-foreground text-xs md:text-sm truncate">{ stat.title }</p>
+                <p className="text-lg md:text-2xl font-bold mt-1">{ isLoading ? '—' : stat.value }</p>
+                <div className="flex items-center gap-1 mt-2 text-green-600 text-xs md:text-sm">
+                  <TrendingUp className="w-3 h-3 md:w-4 md:h-4" />
                   <span>{ stat.trend }</span>
                 </div>
               </div>
-              <div className={ `${ stat.color } p-3 rounded-lg` }>
-                <stat.icon className="w-6 h-6 text-white" />
+              <div className={ `${ stat.color } p-2 md:p-3 rounded-lg shrink-0` }>
+                <stat.icon className="w-4 h-4 md:w-6 md:h-6 text-white" />
               </div>
             </div>
           </motion.div>
@@ -128,17 +128,17 @@ const AdminDashboard = () => {
       </div>
 
       {/* Recent Activity */ }
-      <div className="grid lg:grid-cols-2 gap-6">
+      <div className="grid lg:grid-cols-2 gap-4 md:gap-6">
         <motion.div
           initial={ { opacity: 0, x: -20 } }
           animate={ { opacity: 1, x: 0 } }
-          className="bg-card p-6 rounded-xl shadow-soft"
+          className="bg-card p-4 md:p-6 rounded-xl shadow-soft"
         >
-          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <Ticket className="w-5 h-5 text-accent" />
+          <h2 className="text-base md:text-lg font-semibold mb-4 flex items-center gap-2">
+            <Ticket className="w-4 h-4 md:w-5 md:h-5 text-accent" />
             Recent Bookings
           </h2>
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             { isLoadingRecents ? (
               <div className="flex justify-center py-6">Loading…</div>
             ) : recentBookings.length === 0 ? (
@@ -146,13 +146,13 @@ const AdminDashboard = () => {
             ) : (
               recentBookings.map( ( b, i ) => (
                 <div key={ b._id || i } className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                  <div>
-                    <p className="font-medium">{ b.user?.userName || b.user?.userName || 'Guest' }</p>
-                    <p className="text-sm text-muted-foreground">{ ( b.user && b.user.email ) || '—' }</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-sm md:text-base truncate">{ b.user?.userName || b.user?.userName || 'Guest' }</p>
+                    <p className="text-xs md:text-sm text-muted-foreground truncate">{ ( b.user && b.user.email ) || '—' }</p>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-accent">${ b.totalPrice }</p>
-                    <p className="text-sm text-muted-foreground">{ format( new Date( b.visitDate || b.createdAt ), 'MMM d' ) }</p>
+                  <div className="text-right shrink-0 ml-2">
+                    <p className="font-semibold text-accent text-sm md:text-base">${ b.totalPrice }</p>
+                    <p className="text-xs md:text-sm text-muted-foreground">{ format( new Date( b.visitDate || b.createdAt ), 'MMM d' ) }</p>
                   </div>
                 </div>
               ) )
@@ -163,13 +163,13 @@ const AdminDashboard = () => {
         <motion.div
           initial={ { opacity: 0, x: 20 } }
           animate={ { opacity: 1, x: 0 } }
-          className="bg-card p-6 rounded-xl shadow-soft"
+          className="bg-card p-4 md:p-6 rounded-xl shadow-soft"
         >
-          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-accent" />
+          <h2 className="text-base md:text-lg font-semibold mb-4 flex items-center gap-2">
+            <Calendar className="w-4 h-4 md:w-5 md:h-5 text-accent" />
             Upcoming Events
           </h2>
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             { isLoadingRecents ? (
               <div className="flex justify-center py-6">Loading…</div>
             ) : events.length === 0 ? (
@@ -177,11 +177,11 @@ const AdminDashboard = () => {
             ) : (
               events.map( ( event, i ) => (
                 <div key={ event._id || i } className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                  <div>
-                    <p className="font-medium">{ event.name || event.title }</p>
-                    <p className="text-sm text-muted-foreground">{ event.location || format( new Date( event.createdAt || event.updatedAt || Date.now() ), 'MMM d' ) }</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-sm md:text-base truncate">{ event.name || event.title }</p>
+                    <p className="text-xs md:text-sm text-muted-foreground truncate">{ event.location || format( new Date( event.createdAt || event.updatedAt || Date.now() ), 'MMM d' ) }</p>
                   </div>
-                  <span className="text-sm bg-secondary px-3 py-1 rounded-full">View</span>
+                  <span className="text-xs md:text-sm bg-secondary px-2 md:px-3 py-1 rounded-full shrink-0 ml-2">View</span>
                 </div>
               ) )
             ) }

@@ -72,14 +72,14 @@ const AdminAnalytics = () => {
   }
 
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">Analytics</h1>
-        <p className="text-muted-foreground">Track performance and visitor insights</p>
+    <div className="px-2 sm:px-0">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold text-foreground">Analytics</h1>
+        <p className="text-sm md:text-base text-muted-foreground">Track performance and visitor insights</p>
       </div>
 
       {/* Quick Stats */ }
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
         { [
           { label: 'This Month Revenue', value: analytics.stats[ 0 ].revenue, icon: DollarSign, change: '+18%' },
           { label: 'Monthly Visitors', value: analytics.stats[ 0 ].visitors, icon: Users, change: '+12%' },
@@ -91,27 +91,27 @@ const AdminAnalytics = () => {
             initial={ { opacity: 0, y: 20 } }
             animate={ { opacity: 1, y: 0 } }
             transition={ { delay: i * 0.1 } }
-            className="bg-card p-4 rounded-xl shadow-soft"
+            className="bg-card p-3 md:p-4 rounded-xl shadow-soft"
           >
             <div className="flex items-center justify-between mb-2">
-              <stat.icon className="w-5 h-5 text-accent" />
-              <span className="text-green-600 text-sm font-medium">{ stat.change }</span>
+              <stat.icon className="w-4 h-4 md:w-5 md:h-5 text-accent" />
+              <span className="text-green-600 text-xs md:text-sm font-medium">{ stat.change }</span>
             </div>
-            <p className="text-2xl font-bold">{ stat.value }</p>
-            <p className="text-sm text-muted-foreground">{ stat.label }</p>
+            <p className="text-lg md:text-2xl font-bold">{ stat.value }</p>
+            <p className="text-xs md:text-sm text-muted-foreground truncate">{ stat.label }</p>
           </motion.div>
         ) ) }
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
+      <div className="grid lg:grid-cols-2 gap-4 md:gap-6">
         {/* Revenue Chart */ }
-        <motion.div initial={ { opacity: 0, y: 20 } } animate={ { opacity: 1, y: 0 } } className="bg-card p-6 rounded-xl shadow-soft">
-          <h3 className="text-lg font-semibold mb-4">Monthly Revenue</h3>
-          <ResponsiveContainer width="100%" height={ 300 }>
+        <motion.div initial={ { opacity: 0, y: 20 } } animate={ { opacity: 1, y: 0 } } className="bg-card p-4 md:p-6 rounded-xl shadow-soft">
+          <h3 className="text-base md:text-lg font-semibold mb-4">Monthly Revenue</h3>
+          <ResponsiveContainer width="100%" height={ 250 }>
             <BarChart data={ analytics.revenue }>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={ 12 } />
-              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={ 12 } />
+              <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={ 10 } />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={ 10 } />
               <Tooltip
                 contentStyle={ { backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8 } }
               />
@@ -121,13 +121,13 @@ const AdminAnalytics = () => {
         </motion.div>
 
         {/* Visitors Chart */ }
-        <motion.div initial={ { opacity: 0, y: 20 } } animate={ { opacity: 1, y: 0 } } transition={ { delay: 0.1 } } className="bg-card p-6 rounded-xl shadow-soft">
-          <h3 className="text-lg font-semibold mb-4">Weekly Visitors</h3>
-          <ResponsiveContainer width="100%" height={ 300 }>
+        <motion.div initial={ { opacity: 0, y: 20 } } animate={ { opacity: 1, y: 0 } } transition={ { delay: 0.1 } } className="bg-card p-4 md:p-6 rounded-xl shadow-soft">
+          <h3 className="text-base md:text-lg font-semibold mb-4">Weekly Visitors</h3>
+          <ResponsiveContainer width="100%" height={ 250 }>
             <LineChart data={ analytics.visitors }>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={ 12 } />
-              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={ 12 } />
+              <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={ 10 } />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={ 10 } />
               <Tooltip
                 contentStyle={ { backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8 } }
               />
@@ -137,12 +137,12 @@ const AdminAnalytics = () => {
         </motion.div>
 
         {/* Ticket Type Distribution */ }
-        <motion.div initial={ { opacity: 0, y: 20 } } animate={ { opacity: 1, y: 0 } } transition={ { delay: 0.2 } } className="bg-card p-6 rounded-xl shadow-soft lg:col-span-2">
-          <h3 className="text-lg font-semibold mb-4">Ticket Type Distribution</h3>
-          <div className="flex flex-col md:flex-row items-center gap-8">
-            <ResponsiveContainer width="100%" height={ 250 }>
+        <motion.div initial={ { opacity: 0, y: 20 } } animate={ { opacity: 1, y: 0 } } transition={ { delay: 0.2 } } className="bg-card p-4 md:p-6 rounded-xl shadow-soft lg:col-span-2">
+          <h3 className="text-base md:text-lg font-semibold mb-4">Ticket Type Distribution</h3>
+          <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
+            <ResponsiveContainer width="100%" height={ 200 }>
               <PieChart>
-                <Pie data={ analytics.ticketsSold } cx="50%" cy="50%" innerRadius={ 60 } outerRadius={ 100 } paddingAngle={ 5 } dataKey="value">
+                <Pie data={ analytics.ticketsSold } cx="50%" cy="50%" innerRadius={ 50 } outerRadius={ 80 } paddingAngle={ 5 } dataKey="value">
                   { analytics.ticketsSold.map( ( _, index ) => (
                     <Cell key={ `cell-${ index }` } fill={ COLORS[ index % COLORS.length ] } />
                   ) ) }
@@ -150,11 +150,11 @@ const AdminAnalytics = () => {
                 <Tooltip />
               </PieChart>
             </ResponsiveContainer>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3 md:gap-4">
               { analytics.ticketsSold.map( ( item, i ) => (
                 <div key={ item.name } className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full" style={ { backgroundColor: COLORS[ i ] } } />
-                  <span className="text-sm">{ item.name }: { item.value }%</span>
+                  <span className="text-xs md:text-sm">{ item.name }: { item.value }%</span>
                 </div>
               ) ) }
             </div>
